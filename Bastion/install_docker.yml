@@ -1,0 +1,40 @@
+install_docker.yml  inventory
+debian@debian:~$ cat install_docker.yml 
+- name: Installer Docker et Docker Compose
+  hosts: all
+  become: yes
+  tasks:
+    - name: Mettre à jour les paquets
+      apt:
+        update_cache: yes
+    
+    - name: Installer les dépendances
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Ajouter la clé GPG de Docker 
+      shell: curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+
+    - name: Ajouter le dépôt officiel Docker
+      shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+
+    - name: Installer Docker et Docker Compose
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose
+        state: present
+
+
+    - name: Ajouter l'utilisateur au groupe Docker
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
